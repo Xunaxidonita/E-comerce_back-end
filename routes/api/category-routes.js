@@ -4,30 +4,39 @@ const { Category, Product } = require("../../models");
 // The `/api/categories` endpoint
 
 router.get("/", (req, res) => {
-  db.Category.findAll({ include: Product }).then((Category) => {
-    res.json(Category);
-  });
+  Category.findAll({ include: Product })
+    .then((category) => {
+      res.json(category);
+    })
+    .catch((error) => {
+      res.json({ error: error, message: error.message });
+    });
 });
 // find all categories
 // be sure to include its associated Products
 
 router.get("/:id", (req, res) => {
   const id = req.params.id;
-  db.Category.findOne({ include: Product }, { where: { id: id } }).then(
-    (category) => {
+  Category.findOne({ where: { id: id }, include: Product })
+    .then((category) => {
       console.log(`Found category: ${category}`);
-    }
-  );
+      res.json(category);
+    })
+    .catch((error) => {
+      res.json({ error: error, message: error.message });
+    });
 });
 
 router.post("/", (req, res) => {
   const name = req.body.name;
-  db.owners
-    .create({
-      category_name: name,
-    })
+  Category.create({
+    category_name: name,
+  })
     .then((newCategory) => {
       res.json(newCategory);
+    })
+    .catch((error) => {
+      res.json({ error: error, message: error.message });
     });
   // create a new category
 });
@@ -35,14 +44,17 @@ router.post("/", (req, res) => {
 router.put("/:id", (req, res) => {
   const id = req.params.id;
   const updates = req.body.updates;
-  db.Category.find({
+  Category.findOne({
     where: { id: id },
   })
     .then((category) => {
-      return category.updateAttributes(updates);
+      return category.update(updates);
     })
     .then((updatedCategory) => {
       res.json(updatedCategory);
+    })
+    .catch((error) => {
+      res.json({ error: error, message: error.message });
     });
   // update a category by its `id` value
 });
@@ -50,12 +62,14 @@ router.put("/:id", (req, res) => {
 router.delete("/:id", (req, res) => {
   // delete a category by its `id` value
   const id = req.params.id;
-  db.category
-    .destroy({
-      where: { id: id },
-    })
+  Category.destroy({
+    where: { id: id },
+  })
     .then((deletedCategory) => {
       res.json(deletedCategory);
+    })
+    .catch((error) => {
+      res.json({ error: error, message: error.message });
     });
 });
 
